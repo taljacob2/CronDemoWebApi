@@ -9,14 +9,25 @@ namespace CronDemoWebApi
         public static void RunAllUsers(PerformContext context)
         {
             context.WriteLine("Recurring job for all users!");
-
             var db = new DB();
-            Parallel.ForEach(db.Users, (user) => RunUser(user, context));
+
+            var progress = context.WriteProgressBar();
+            var currentSuccessfulTasks = 0;
+
+            Parallel.ForEach(db.Users, user =>
+            {
+                RunUser(user, context);
+
+                // Update the successful task count
+                Interlocked.Increment(ref currentSuccessfulTasks);
+
+                // Update progress bar
+                progress.SetValue((currentSuccessfulTasks / db.Users.Count()) * 100);
+            });
         }
 
         public static void RunUser(string user, PerformContext context)
         {
-
             context.WriteLine($"Hello {user}");
             for (int i = 0; i < 10; i++)
             {
