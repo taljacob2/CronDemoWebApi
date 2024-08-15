@@ -1,4 +1,6 @@
-﻿namespace CronDemoWebApi
+﻿using Hangfire;
+
+namespace CronDemoWebApi
 {
     public class CronJobs
     {
@@ -18,6 +20,20 @@
             {
                 Console.WriteLine(user);
                 Thread.Sleep(1000);
+            }
+        }
+
+        public static void InitializeHangfireJobs(IServiceProvider serviceProvider)
+        {
+            using (var scope = serviceProvider.CreateScope())
+            {
+                var recurringJobManager = scope.ServiceProvider.GetRequiredService<IRecurringJobManager>();
+
+                recurringJobManager.AddOrUpdate(
+                    "RecurringJobForAllUsers",
+                    () => CronJobs.RunAllUsers(),
+                    "* * * * *", // Cron expression for every minute
+                    new RecurringJobOptions() { TimeZone = TimeZoneInfo.Utc });
             }
         }
     }

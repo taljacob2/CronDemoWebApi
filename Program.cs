@@ -10,8 +10,10 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddHangfire(c => c.UseMemoryStorage());
+builder.Services.AddHangfireServer();
 
-var app = builder.Build();
+var app = builder.Build();  
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -26,24 +28,6 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-// Configure Hangfire to use in-memory storage for testing
-GlobalConfiguration.Configuration.UseMemoryStorage();
-
-// Create and start a new Hangfire server
-using (var server = new BackgroundJobServer())
-{
-    // Enqueue a job
-    //BackgroundJob.Enqueue(() => Console.WriteLine("Fire-and-forget!"));
-
-    RecurringJob.AddOrUpdate(
-        $"RecurringJobForAllUsers",
-        () => CronJobs.RunAllUsers(),
-        "* * * * *", // Cron.Monthly
-        new RecurringJobOptions() { TimeZone = TimeZoneInfo.Utc });
-
-    // Keep the application running to process background jobs
-    Console.WriteLine("Press any key to exit...");
-    Console.ReadKey();
-}
+CronJobs.InitializeHangfireJobs(app.Services);
 
 app.Run();
