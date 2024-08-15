@@ -28,6 +28,8 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+app.UseHangfireDashboard();
+
 CronJobs.InitializeHangfireJobs(app.Services);
 
 app.Run();
