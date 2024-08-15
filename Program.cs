@@ -1,5 +1,6 @@
 using CronDemoWebApi;
 using Hangfire;
+using Hangfire.Console;
 using Hangfire.MemoryStorage;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -10,7 +11,9 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddHangfire(c => c.UseMemoryStorage());
+builder.Services.AddHangfire(conf => conf
+    .UseMemoryStorage()
+    .UseConsole());
 builder.Services.AddHangfireServer();
 
 var app = builder.Build();  

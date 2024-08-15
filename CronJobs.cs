@@ -1,24 +1,26 @@
 ﻿using Hangfire;
+using Hangfire.Console;
+using Hangfire.Server;
 
 namespace CronDemoWebApi
 {
     public class CronJobs
     {
-        public static void RunAllUsers()
+        public static void RunAllUsers(PerformContext context)
         {
-            Console.WriteLine("Recurring job for all users!");
+            context.WriteLine("Recurring job for all users!");
 
             var db = new DB();
-            Parallel.ForEach(db.Users, (user) => RunUser(user));
+            Parallel.ForEach(db.Users, (user) => RunUser(user, context));
         }
 
-        public static void RunUser(string user)
+        public static void RunUser(string user, PerformContext context)
         {
 
-            Console.WriteLine($"Hello {user}");
+            context.WriteLine($"Hello {user}");
             for (int i = 0; i < 10; i++)
             {
-                Console.WriteLine(user);
+                context.WriteLine(user);
                 Thread.Sleep(1000);
             }
         }
@@ -31,7 +33,7 @@ namespace CronDemoWebApi
 
                 recurringJobManager.AddOrUpdate(
                     "RecurringJobForAllUsers",
-                    () => CronJobs.RunAllUsers(),
+                    () => CronJobs.RunAllUsers(null),
                     "* * * * *", // Cron expression for every minute
                     new RecurringJobOptions() { TimeZone = TimeZoneInfo.Utc });
             }
