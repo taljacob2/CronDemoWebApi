@@ -1,6 +1,12 @@
 ﻿using Hangfire;
 using Hangfire.Console;
 using Hangfire.Server;
+using Microsoft.Extensions.DependencyInjection;
+using System;
+using System.Collections.Concurrent;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace CronDemoWebApi
 {
@@ -12,17 +18,27 @@ namespace CronDemoWebApi
             var db = new DB();
 
             var progress = context.WriteProgressBar();
-            var currentSuccessfulTasks = 0;
+            var userCount = db.Users.Count();
+            var successfulTasks = new ConcurrentBag<bool>(); // Thread-safe collection to count successful tasks
 
             Parallel.ForEach(db.Users, user =>
             {
-                RunUser(user, context);
-
-                // Update the successful task count
-                Interlocked.Increment(ref currentSuccessfulTasks);
-
-                // Update progress bar
-                progress.SetValue((currentSuccessfulTasks / db.Users.Count()) * 100);
+                try
+                {
+                    RunUser(user, context);
+                    successfulTasks.Add(true); // Add to the successful tasks
+                }
+                catch
+                {
+                    // Handle or log exceptions as needed
+                }
+                finally
+                {
+                    // Update the progress bar safely
+                    var completedCount = successfulTasks.Count;
+                    var progressValue = (completedCount * 100) / userCount;
+                    progress.SetValue(progressValue);
+                }
             });
         }
 
@@ -32,7 +48,7 @@ namespace CronDemoWebApi
             for (int i = 0; i < 10; i++)
             {
                 context.WriteLine(user);
-                Thread.Sleep(1000);
+                Thread.Sleep(1000); // Simulate work
             }
         }
 
