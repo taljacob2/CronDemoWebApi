@@ -1,7 +1,5 @@
-using CronDemoWebApi;
-using Hangfire;
-using Hangfire.Console;
-using Hangfire.MemoryStorage;
+using CronDemoWebApi.Services;
+using CronDemoWebApi.Tasks;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,10 +9,11 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddHangfire(conf => conf
-    .UseMemoryStorage()
-    .UseConsole());
-builder.Services.AddHangfireServer();
+
+builder.Logging.AddConsole();
+
+builder.Services.AddSingleton<CronJobsService>();
+builder.Services.AddSingleton<UserTasks>();
 
 var app = builder.Build();
 
@@ -31,8 +30,7 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-app.UseHangfireDashboard();
-
-CronJobs.InitializeHangfireJobs(app.Services);
+var userTasks = app.Services.GetRequiredService<UserTasks>();
+await userTasks.InitializeAsync();
 
 app.Run();
