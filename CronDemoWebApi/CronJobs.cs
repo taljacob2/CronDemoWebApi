@@ -2,6 +2,7 @@
 using Hangfire.Console;
 using Hangfire.Server;
 using System.Collections.Concurrent;
+using NCrontab;
 
 namespace CronDemoWebApi
 {
@@ -66,6 +67,39 @@ namespace CronDemoWebApi
                     () => CronJobs.RunAllUsers(null),
                     "* * * * *", // Cron expression for every minute
                     new RecurringJobOptions() { TimeZone = TimeZoneInfo.Utc });
+            }
+        }
+
+        public static async Task RunAsync()
+        {
+            // Define the cron expression for every minute
+            var cronExpression = "* * * * *";
+
+            // Create a CrontabSchedule instance based on the cron expression
+            var schedule = CrontabSchedule.Parse(cronExpression);
+            var nextOccurrence = schedule.GetNextOccurrence(DateTime.UtcNow);
+
+            Console.WriteLine($"Next occurrence: {nextOccurrence}");
+
+            // Create a CancellationTokenSource to control the application's runtime
+            using (var cts = new CancellationTokenSource())
+            {
+                var token = cts.Token;
+
+                while (!token.IsCancellationRequested)
+                {
+                    // Wait until the next occurrence
+                    var delay = nextOccurrence - DateTime.UtcNow;
+                    if (delay < TimeSpan.Zero) delay = TimeSpan.Zero;
+
+                    await Task.Delay(delay, token);
+
+                    // Print "Hello"
+                    Console.WriteLine("Hello");
+
+                    // Calculate the next occurrence
+                    nextOccurrence = schedule.GetNextOccurrence(DateTime.UtcNow);
+                }
             }
         }
     }
