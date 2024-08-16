@@ -23,9 +23,10 @@ namespace CronDemoWebApi
                     RunUser(user, context);
                     successfulTasks.Add(true); // Add to the successful tasks
                 }
-                catch
+                catch (Exception ex)
                 {
                     // Handle or log exceptions as needed
+                    PrintError(context, ex.ToString());
                 }
                 finally
                 {
@@ -35,6 +36,13 @@ namespace CronDemoWebApi
                     progress.SetValue(progressValue);
                 }
             });
+        }
+
+        private static void PrintError(PerformContext context, string message)
+        {
+            context.SetTextColor(ConsoleTextColor.Red);
+            context.WriteLine(message);
+            context.ResetTextColor();
         }
 
         public static void RunUser(string user, PerformContext context)
