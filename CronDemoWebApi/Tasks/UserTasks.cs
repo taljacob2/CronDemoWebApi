@@ -1,15 +1,22 @@
-﻿using System.Collections.Concurrent;
-using NCrontab;
+﻿using CronDemoWebApi.Services;
+using System.Collections.Concurrent;
 
-namespace CronDemoWebApi
+namespace CronDemoWebApi.Tasks
 {
-    public class CronJobs
+    public class UserTasks
     {
-        private readonly ILogger<CronJobs> _logger;
+        private readonly ILogger<UserTasks> _logger;
+        private readonly CronJobsService _cronJobsService;
 
-        public CronJobs(ILogger<CronJobs> logger)
+        public UserTasks(ILogger<UserTasks> logger, CronJobsService cronJobsService)
         {
             _logger = logger;
+            _cronJobsService = cronJobsService;
+        }
+
+        public async Task InitializeAsync()
+        {
+            await _cronJobsService.CreateCronJobAsync("* * * * *", RunAllUsers);
         }
 
         private void RunAllUsers()
@@ -52,39 +59,6 @@ namespace CronDemoWebApi
             {
                 _logger.LogInformation(user);
                 Thread.Sleep(1000); // Simulate work
-            }
-        }
-
-        public async Task InitCronJobsAsync()
-        {
-            await CreateCronJobAsync("* * * * *", RunAllUsers);
-        }
-
-        public async Task CreateCronJobAsync(string cronExpression, Action action)
-        {
-            // Create a CrontabSchedule instance based on the cron expression
-            var schedule = CrontabSchedule.Parse(cronExpression);
-            var nextOccurrence = schedule.GetNextOccurrence(DateTime.UtcNow);
-
-            // Create a CancellationTokenSource to control the application's runtime
-            using (var cts = new CancellationTokenSource())
-            {
-                var token = cts.Token;
-
-                while (!token.IsCancellationRequested)
-                {
-                    // Wait until the next occurrence
-                    var delay = nextOccurrence - DateTime.UtcNow;
-                    if (delay < TimeSpan.Zero) delay = TimeSpan.Zero;
-
-                    await Task.Delay(delay, token);
-
-                    // Invoke action
-                    action.Invoke();
-
-                    // Calculate the next occurrence
-                    nextOccurrence = schedule.GetNextOccurrence(DateTime.UtcNow);
-                }
             }
         }
     }

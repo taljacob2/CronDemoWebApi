@@ -1,4 +1,5 @@
-using CronDemoWebApi;
+using CronDemoWebApi.Services;
+using CronDemoWebApi.Tasks;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,7 +12,8 @@ builder.Services.AddSwaggerGen();
 
 builder.Logging.AddConsole();
 
-builder.Services.AddSingleton<CronJobs>();
+builder.Services.AddSingleton<CronJobsService>();
+builder.Services.AddSingleton<UserTasks>();
 
 var app = builder.Build();
 
@@ -28,7 +30,7 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-var cronJobs = app.Services.GetRequiredService<CronJobs>();
-await cronJobs.InitCronJobsAsync();
+var userTasks = app.Services.GetRequiredService<UserTasks>();
+await userTasks.InitializeAsync();
 
 app.Run();
