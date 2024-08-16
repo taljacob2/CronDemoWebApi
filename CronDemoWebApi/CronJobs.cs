@@ -1,19 +1,24 @@
-﻿using Hangfire;
-using Hangfire.Console;
-using Hangfire.Server;
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using NCrontab;
 
 namespace CronDemoWebApi
 {
     public class CronJobs
     {
-        public static void RunAllUsers(PerformContext context)
+        private readonly ILogger<CronJobs> _logger;
+
+        public CronJobs(ILogger<CronJobs> logger)
         {
-            context.WriteLine("Recurring job for all users!");
+            _logger = logger;
+        }
+
+        private void RunAllUsers()
+        {
+            _logger.LogInformation("Recurring job for all users!");
             var db = new DB();
 
-            var progress = context.WriteProgressBar();
+            // TODO:
+            //var progress = logger.WriteProgressBar();
             var userCount = db.Users.Count();
             var successfulTasks = new ConcurrentBag<bool>(); // Thread-safe collection to count successful tasks
 
@@ -21,65 +26,45 @@ namespace CronDemoWebApi
             {
                 try
                 {
-                    RunUser(user, context);
+                    RunUser(user);
                     successfulTasks.Add(true); // Add to the successful tasks
                 }
                 catch (Exception ex)
                 {
                     // Handle or log exceptions as needed
-                    PrintError(context, ex.ToString());
+                    _logger.LogError(ex.ToString());
                 }
                 finally
                 {
                     // Update the progress bar safely
                     var completedCount = successfulTasks.Count;
                     var progressValue = (completedCount * 100) / userCount;
-                    progress.SetValue(progressValue);
+                    // TODO:
+                    //progress.SetValue(progressValue);
                 }
             });
         }
 
-        private static void PrintError(PerformContext context, string message)
+        private void RunUser(string user)
         {
-            context.SetTextColor(ConsoleTextColor.Red);
-            context.WriteLine(message);
-            context.ResetTextColor();
-        }
-
-        public static void RunUser(string user, PerformContext context)
-        {
-            context.WriteLine($"Hello {user}");
+            _logger.LogInformation($"Hello {user}");
             for (int i = 0; i < 10; i++)
             {
-                context.WriteLine(user);
+                _logger.LogInformation(user);
                 Thread.Sleep(1000); // Simulate work
             }
         }
 
-        public static void InitializeHangfireJobs(IServiceProvider serviceProvider)
+        public async Task InitCronJobsAsync()
         {
-            using (var scope = serviceProvider.CreateScope())
-            {
-                var recurringJobManager = scope.ServiceProvider.GetRequiredService<IRecurringJobManager>();
-
-                recurringJobManager.AddOrUpdate(
-                    "RecurringJobForAllUsers",
-                    () => CronJobs.RunAllUsers(null),
-                    "* * * * *", // Cron expression for every minute
-                    new RecurringJobOptions() { TimeZone = TimeZoneInfo.Utc });
-            }
+            await CreateCronJobAsync("* * * * *", RunAllUsers);
         }
 
-        public static async Task RunAsync()
+        public async Task CreateCronJobAsync(string cronExpression, Action action)
         {
-            // Define the cron expression for every minute
-            var cronExpression = "* * * * *";
-
             // Create a CrontabSchedule instance based on the cron expression
             var schedule = CrontabSchedule.Parse(cronExpression);
             var nextOccurrence = schedule.GetNextOccurrence(DateTime.UtcNow);
-
-            Console.WriteLine($"Next occurrence: {nextOccurrence}");
 
             // Create a CancellationTokenSource to control the application's runtime
             using (var cts = new CancellationTokenSource())
@@ -94,8 +79,8 @@ namespace CronDemoWebApi
 
                     await Task.Delay(delay, token);
 
-                    // Print "Hello"
-                    Console.WriteLine("Hello");
+                    // Invoke action
+                    action.Invoke();
 
                     // Calculate the next occurrence
                     nextOccurrence = schedule.GetNextOccurrence(DateTime.UtcNow);
