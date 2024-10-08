@@ -12,10 +12,7 @@ namespace CronDemoWebApi.Tasks
         {
             _logger = logger;
             _cronJobsService = cronJobsService;
-        }
 
-        public void Initialize()
-        {
             _cronJobsService.CreateCronJobAsync("* * * * *", RunAllUsers).Wait();
         }
 

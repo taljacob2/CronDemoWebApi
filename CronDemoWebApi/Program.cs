@@ -30,7 +30,6 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-var userTasks = app.Services.GetRequiredService<UserTasks>();
-userTasks.Initialize();
+app.Services.GetRequiredService<UserTasks>();
 
 app.Run();
