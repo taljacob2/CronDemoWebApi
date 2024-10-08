@@ -1,9 +1,7 @@
-using CronDemoWebApi.Services;
-using CronDemoWebApi.Tasks;
+using CronDemoWebApi.CronJobs;
+using CronDemoWebApi.Utils;
 
 var builder = WebApplication.CreateBuilder(args);
-
-// Add services to the container.
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -12,8 +10,8 @@ builder.Services.AddSwaggerGen();
 
 builder.Logging.AddConsole();
 
-builder.Services.AddSingleton<CronJobsService>();
-builder.Services.AddHostedService<UserTasks>();
+builder.Services.AddSingleton<CronJobsBuilder>();
+builder.Services.AddHostedService<UserLogsCronJob>();
 
 var app = builder.Build();
 

@@ -1,16 +1,17 @@
-﻿using CronDemoWebApi.Services;
+﻿using CronDemoWebApi.Utils;
 
-namespace CronDemoWebApi.Tasks
+namespace CronDemoWebApi.CronJobs
 {
-    public class UserTasks : BackgroundService
+    public class UserLogsCronJob : BackgroundService
     {
-        private readonly ILogger<UserTasks> _logger;
-        private readonly CronJobsService _cronJobsService;
+        private readonly ILogger<UserLogsCronJob> _logger;
+        private readonly CronJobsBuilder _cronJobsBuilder;
 
-        public UserTasks(ILogger<UserTasks> logger, CronJobsService cronJobsService)
+        public UserLogsCronJob(
+            ILogger<UserLogsCronJob> logger, CronJobsBuilder cronJobsBuilder)
         {
             _logger = logger;
-            _cronJobsService = cronJobsService;
+            _cronJobsBuilder = cronJobsBuilder;
         }
 
         private void RunAllUsers()
@@ -33,7 +34,7 @@ namespace CronDemoWebApi.Tasks
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            await _cronJobsService.CreateCronJobAsync(
+            await _cronJobsBuilder.CreateCronJobAsync(
                 "* * * * *", RunAllUsers, stoppingToken);
         }
     }

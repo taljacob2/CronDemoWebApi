@@ -1,8 +1,8 @@
 ﻿using NCrontab;
 
-namespace CronDemoWebApi.Services
+namespace CronDemoWebApi.Utils
 {
-    public class CronJobsService
+    public class CronJobsBuilder
     {
         public async Task CreateCronJobAsync(
             string cronExpression, Action action, CancellationToken stoppingToken)
