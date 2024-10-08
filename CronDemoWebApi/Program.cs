@@ -1,5 +1,4 @@
 using CronDemoWebApi.CronJobs;
-using CronDemoWebApi.Utils;
 
 var builder = WebApplication.CreateBuilder(args);
 

@@ -1,6 +1,6 @@
 ﻿using NCrontab;
 
-namespace CronDemoWebApi.Utils
+namespace CronDemoWebApi.CronJobs
 {
     public class CronJobsBuilder
     {

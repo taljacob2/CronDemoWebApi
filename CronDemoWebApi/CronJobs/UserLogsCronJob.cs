@@ -1,6 +1,4 @@
-﻿using CronDemoWebApi.Utils;
-
-namespace CronDemoWebApi.CronJobs
+﻿namespace CronDemoWebApi.CronJobs
 {
     public class UserLogsCronJob : BackgroundService
     {
