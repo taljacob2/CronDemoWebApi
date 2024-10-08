@@ -3,7 +3,7 @@ using System.Collections.Concurrent;
 
 namespace CronDemoWebApi.Tasks
 {
-    public class UserTasks
+    public class UserTasks : BackgroundService
     {
         private readonly ILogger<UserTasks> _logger;
         private readonly CronJobsService _cronJobsService;
@@ -12,8 +12,6 @@ namespace CronDemoWebApi.Tasks
         {
             _logger = logger;
             _cronJobsService = cronJobsService;
-
-            _cronJobsService.CreateCronJobAsync("* * * * *", RunAllUsers).Wait();
         }
 
         private void RunAllUsers()
@@ -57,6 +55,11 @@ namespace CronDemoWebApi.Tasks
                 _logger.LogInformation(user);
                 Thread.Sleep(1000); // Simulate work
             }
+        }
+
+        protected override Task ExecuteAsync(CancellationToken stoppingToken)
+        {
+            return _cronJobsService.CreateCronJobAsync("* * * * *", RunAllUsers);
         }
     }
 }

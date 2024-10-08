@@ -13,7 +13,7 @@ builder.Services.AddSwaggerGen();
 builder.Logging.AddConsole();
 
 builder.Services.AddSingleton<CronJobsService>();
-builder.Services.AddSingleton<UserTasks>();
+builder.Services.AddHostedService<UserTasks>();
 
 var app = builder.Build();
 
@@ -29,7 +29,5 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
-
-app.Services.GetRequiredService<UserTasks>();
 
 app.Run();
