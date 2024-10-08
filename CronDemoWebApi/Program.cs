@@ -9,7 +9,6 @@ builder.Services.AddSwaggerGen();
 
 builder.Logging.AddConsole();
 
-builder.Services.AddSingleton<CronJobsBuilder>();
 builder.Services.AddHostedService<UserLogsCronJob>();
 
 var app = builder.Build();

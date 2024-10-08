@@ -3,13 +3,10 @@
     public class UserLogsCronJob : BackgroundService
     {
         private readonly ILogger<UserLogsCronJob> _logger;
-        private readonly CronJobsBuilder _cronJobsBuilder;
 
-        public UserLogsCronJob(
-            ILogger<UserLogsCronJob> logger, CronJobsBuilder cronJobsBuilder)
+        public UserLogsCronJob(ILogger<UserLogsCronJob> logger)
         {
             _logger = logger;
-            _cronJobsBuilder = cronJobsBuilder;
         }
 
         private void RunAllUsers()
@@ -32,7 +29,7 @@
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            await _cronJobsBuilder.CreateCronJobAsync(
+            await CronJobsBuilder.CreateCronJobAsync(
                 "* * * * *", RunAllUsers, stoppingToken);
         }
     }

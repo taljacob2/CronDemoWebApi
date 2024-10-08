@@ -4,7 +4,7 @@ namespace CronDemoWebApi.CronJobs
 {
     public class CronJobsBuilder
     {
-        public async Task CreateCronJobAsync(
+        public static async Task CreateCronJobAsync(
             string cronExpression, Action action, CancellationToken stoppingToken)
         {
             // Create a CrontabSchedule instance based on the cron expression
