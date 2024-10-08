@@ -31,6 +31,6 @@ app.UseAuthorization();
 app.MapControllers();
 
 var userTasks = app.Services.GetRequiredService<UserTasks>();
-await userTasks.InitializeAsync();
+userTasks.Initialize();
 
 app.Run();

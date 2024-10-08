@@ -14,9 +14,9 @@ namespace CronDemoWebApi.Tasks
             _cronJobsService = cronJobsService;
         }
 
-        public async Task InitializeAsync()
+        public void Initialize()
         {
-            await _cronJobsService.CreateCronJobAsync("* * * * *", RunAllUsers);
+            _cronJobsService.CreateCronJobAsync("* * * * *", RunAllUsers).Wait();
         }
 
         private void RunAllUsers()
