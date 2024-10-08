@@ -57,9 +57,9 @@ namespace CronDemoWebApi.Tasks
             }
         }
 
-        protected override Task ExecuteAsync(CancellationToken stoppingToken)
+        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            return _cronJobsService.CreateCronJobAsync(
+            await _cronJobsService.CreateCronJobAsync(
                 "* * * * *", RunAllUsers, stoppingToken);
         }
     }
